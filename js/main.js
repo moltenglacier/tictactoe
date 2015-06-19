@@ -28,8 +28,24 @@ $(document).ready(function() {
       gridUpdate[clickedCell] = currentUserMark;
       FB.turnRef.set({ lastMark: currentUserMark });
       FB.gridRef.update(gridUpdate);
-      var claimedCells = $(".cell." + currentUserMark);
-      // claimedCells.map(function(i, c) { return $(c).data("win"); });
+      var $claimedCells = $(".cell." + currentUserMark);
+      var $marks = $claimedCells.map(function(i, c) { return $(c).data("win").split(","); });
+      var marks = $.makeArray($marks);
+      var hasWon = false;
+      "h1,h2,h3,v1,v2,v3,c1,c2".split(",").forEach(function(winCondition){
+        var conditionsMet = marks.reduce(function(total, currentCondition){
+          if (currentCondition === winCondition){
+            return total + 1;
+          }
+          return total;
+        }, 0);
+        if (conditionsMet === 3){
+          hasWon = true;
+        }
+      });
+      if (hasWon){
+        alert("You Win!");
+      }
     }
   });
 });
@@ -120,4 +136,8 @@ function getName(authData) {
      case 'facebook':
        return authData.facebook.displayName;
   }
+}
+
+function checkWin(){
+
 }
