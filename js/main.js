@@ -1,9 +1,19 @@
+<<<<<<< HEAD
 var ref = new Firebase("https://collinstictactoe.firebaseio.com/adsjfasdjfsadjfklasdfjlsdakfjalskdjfkldsaflk");
 var gameRef = ref.child("game");
+=======
+var FB = {};
+
+FB.ref = new Firebase("https://cht3game.firebaseio.com/sdfjkadskljfloeqworuoierutoie");
+FB.gameRef = FB.ref.child("game");
+FB.gridRef = FB.gameRef.child("grid");
+>>>>>>> 0d3c6cde7b01f3e79a981fb3315c560bff34bba8
 
 $(document).ready(function(){
+  var clickedCell, currentMark, gridUpdate = {};
+
   $("button#Login").on("click", function(){
-    ref.authWithOAuthPopup("twitter", function(error, authData) {
+    FB.ref.authWithOAuthPopup("twitter", function(error, authData) {
       if (error) {
         console.log("Login Failed!", error);
       } else {
@@ -13,8 +23,12 @@ $(document).ready(function(){
   });
 
   $(".cell").on("click", function() {
-    var currentMark = Game.currentMark();
+    currentMark = Game.currentMark();
     if (currentMark) {
+      clickedCell = $(this).data("cell");
+      gridUpdate = {};
+      gridUpdate["gc-" + clickedCell] = currentMark;
+      FB.gridRef.update(gridUpdate);
       $(this).addClass(currentMark).text(currentMark);
     }
   });
@@ -34,7 +48,7 @@ Game.currentMark = function() {
 
 // { gc1: 'x', gc2: 'o' ... }
 
-gameRef.on("value", assignPlayers);
+FB.gameRef.on("value", assignPlayers);
 
 function assignPlayers(snap) {
   var game = snap.val();
@@ -62,7 +76,7 @@ Game.nextPlayer = function() {
 }
 
 var isNewUser = true;
-ref.onAuth(function(authData) {
+FB.ref.onAuth(function(authData) {
   console.log("Auth:", authData);
   if (authData && isNewUser) {
     // save the user's profile into Firebase so we can list users,
@@ -71,14 +85,14 @@ ref.onAuth(function(authData) {
     //   provider: authData.provider,
     //   name: getName(authData)
     // });
-    gameRef.once("value", function(snap) {
+    FB.gameRef.once("value", function(snap) {
       assignPlayers(snap);
       Game.currentUsername = authData.twitter.username;
       var options = {}, nextPlayer = Game.nextPlayer();
       console.log(nextPlayer);
       if (nextPlayer) {
         options[nextPlayer] = Game.currentUsername;
-        gameRef.child("players").update(options);
+        FB.gameRef.child("players").update(options);
       }
     });
   }
