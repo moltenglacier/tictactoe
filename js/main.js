@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-var ref = new Firebase("https://collinstictactoe.firebaseio.com/adsjfasdjfsadjfklasdfjlsdakfjalskdjfkldsaflk");
-var gameRef = ref.child("game");
-=======
 var FB = {};
 
-FB.ref = new Firebase("https://cht3game.firebaseio.com/sdfjkadskljfloeqworuoierutoie");
+FB.ref = new Firebase("https://collinstictactoe.firebaseio.com/");
 FB.gameRef = FB.ref.child("game");
-FB.playersRef = FB.gameRef.child("players");
 FB.gridRef = FB.gameRef.child("grid");
->>>>>>> 0d3c6cde7b01f3e79a981fb3315c560bff34bba8
 
 $(document).ready(function(){
   var clickedCell, currentMark, gridUpdate = {};
@@ -28,7 +22,7 @@ $(document).ready(function(){
     if (currentMark) {
       clickedCell = $(this).data("cell");
       gridUpdate = {};
-      gridUpdate[clickedCell] = currentMark;
+      gridUpdate["gc-" + clickedCell] = currentMark;
       FB.gridRef.update(gridUpdate);
       $(this).addClass(currentMark).text(currentMark);
     }
@@ -45,26 +39,24 @@ Game.currentMark = function() {
     return 'o';
   }
   return null;
-}
+};
 
-FB.playersRef.on("value", assignPlayers);
-FB.gridRef.on("value", redrawGrid);
+// { gc1: 'x', gc2: 'o' ... }
+
+FB.gameRef.on("value", assignPlayers);
 
 function assignPlayers(snap) {
-  var players = snap.val();
-  console.log("Snap Val:", players);
-  if (!players) {
+  var game = snap.val();
+  console.log("Snap Val:", game);
+  if (!game) {
     return;
   }
-  Game.players = players;
-  Game.x = players.x;
-  Game.o = players.o;
+  Game.players = game.players;
+  Game.x = game.players.x;
+  Game.o = game.players.o;
 
   $("#first-player").text(Game.players.x + " - X");
   $("#second-player").text(Game.players.o + " - O");
-}
-function redrawGrid(snap) {
-  console.log(snap.val());
 }
 
 Game.nextPlayer = function() {
@@ -76,7 +68,7 @@ Game.nextPlayer = function() {
     return 'o';
   }
   return null;
-}
+};
 
 var isNewUser = true;
 FB.ref.onAuth(function(authData) {
@@ -88,14 +80,14 @@ FB.ref.onAuth(function(authData) {
     //   provider: authData.provider,
     //   name: getName(authData)
     // });
-    FB.playersRef.once("value", function(snap) {
+    FB.gameRef.once("value", function(snap) {
       assignPlayers(snap);
       Game.currentUsername = authData.twitter.username;
       var options = {}, nextPlayer = Game.nextPlayer();
       console.log(nextPlayer);
       if (nextPlayer) {
         options[nextPlayer] = Game.currentUsername;
-        FB.playersRef.update(options);
+        FB.gameRef.child("players").update(options);
       }
     });
   }
