@@ -1,4 +1,4 @@
-var ref = new Firebase("https://cht3game.firebaseio.com/adsjfasdjfsadjfklasdfjlsdakfjalskdjfkldsaflk");
+var ref = new Firebase("https://collinstictactoe.firebaseio.com/adsjfasdjfsadjfklasdfjlsdakfjalskdjfkldsaflk");
 var gameRef = ref.child("game");
 
 $(document).ready(function(){
