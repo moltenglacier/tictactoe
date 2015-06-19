@@ -3,6 +3,7 @@ var FB = {};
 FB.ref = new Firebase("https://collinstictactoe.firebaseio.com/");
 FB.gameRef = FB.ref.child("game");
 FB.gridRef = FB.gameRef.child("grid");
+FB.turnRef = FB.gameRef.child("turn");
 
 $(document).ready(function(){
   var clickedCell, currentMark, gridUpdate = {};
@@ -22,9 +23,9 @@ $(document).ready(function(){
     if (currentMark) {
       clickedCell = $(this).data("cell");
       gridUpdate = {};
-      gridUpdate["gc-" + clickedCell] = currentMark;
+      gridUpdate[clickedCell] = currentMark;
+      FB.turnRef.set({lastMark: currentMark})
       FB.gridRef.update(gridUpdate);
-      $(this).addClass(currentMark).text(currentMark);
     }
   });
 });
@@ -44,6 +45,7 @@ Game.currentMark = function() {
 // { gc1: 'x', gc2: 'o' ... }
 
 FB.gameRef.on("value", assignPlayers);
+FB.gridRef.on("value", redrawGrid);
 
 function assignPlayers(snap) {
   var game = snap.val();
@@ -57,6 +59,14 @@ function assignPlayers(snap) {
 
   $("#first-player").text(Game.players.x + " - X");
   $("#second-player").text(Game.players.o + " - O");
+}
+
+function redrawGrid(snap){
+  var grid = snap.val(), mark;
+  for (var key in grid){
+    mark = grid[key];
+    $("cell[data-cell=" + key + "]").addClass(mark).text(mark);
+  }
 }
 
 Game.nextPlayer = function() {
